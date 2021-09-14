@@ -1,7 +1,14 @@
 {
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.min.js",
+  ],
   "compilerOptions": {
-    "target": "es5",
+    "baseUrl": "src",
+    "target": "ES6",
     "lib": [
+      "es6",
       "dom",
       "dom.iterable",
       "esnext"
@@ -10,7 +17,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -18,9 +25,15 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false
   },
   "include": [
     "src"
-  ]
+  ],
+  "paths": {
+    "@mui/styled-engine": ["./node_modules/@mui/styled-engine-sc"]
+  }
 }
