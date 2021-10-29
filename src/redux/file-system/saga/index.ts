@@ -25,6 +25,7 @@ export function* openFile(action: Open) {
       id:idArray[i],
       name:contentArray[i].name,
       content:contentArray[i].content,
+      type:"standalone"
     })
   }
   yield put(actions.newEditor(fileArray));
@@ -43,6 +44,7 @@ export function* openFileTreeView(action:OpenTreeItem){
       id:idArray[i],
       name:contentArray[i].name,
       content:contentArray[i].content,
+      type:"folder"
     })
   }
   yield put(actions.newEditor(fileArray));

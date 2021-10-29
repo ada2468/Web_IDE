@@ -1,22 +1,20 @@
-import { Dispatch } from 'redux';
 import { searchTable as searchTableType } from "file-system";
 
 import {
     GetDirectoryHandler,
     ImportFolderAction,
     Open,
+    SetCurrentId,
     NewEditor,
     fileArrayType,
     OpenTreeItem,
+    NewFile,
     ActionType
 } from '../actions';
 
 interface importFolderInputType {
     searchTable: searchTableType,
 }
-
-
-
 
 
 export const importFolder = ({ searchTable }: importFolderInputType): ImportFolderAction => {
@@ -61,4 +59,22 @@ export const openTreeItem = (fileHandler: Array<FileSystemFileHandle>, id: Array
         }
     }
 
+}
+
+export const newFile = (id:string): NewFile =>{
+    return{
+        type:ActionType.NEW_FILE,
+        payload:{
+            id
+        }
+    }
+}
+
+export const setCurrentId = (id:string):SetCurrentId =>{
+    return{
+        type:ActionType.SET_CURRENT_ID,
+        payload:{
+            id
+        }
+    }
 }

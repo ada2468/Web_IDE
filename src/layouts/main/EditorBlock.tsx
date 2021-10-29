@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { RootState } from 'redux/reducers';
+import { setCurrentId } from 'redux/actions';
 import { connect, ConnectedProps } from 'react-redux';
 import Editor from 'components/Editor';
 
@@ -45,23 +46,23 @@ const StyledTabs = styled(({ children, ...other }) =>
 `
 
 const mapState = (state: RootState) => {
-  return { 'editorState': state.fileSystem.editorState };
+  return { 'editorState': state.fileSystem.editorState, 'currentId':state.fileSystem.currentId };
 }
 
 const EditorBlock = (props: PropsFromRedux) => {
 
-  const { editorState } = props;
+  const { editorState, currentId } = props;
   type editorStateType = typeof editorState;
-  const [value, setValue] = React.useState("");
+
 
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    setValue(newValue);
+    props.dispatch(setCurrentId(newValue));
   };
 
   const createTab = (editorState: editorStateType = []) => {
     return editorState.map((state, index) => {
-      return (<Tab label={state.name} value={state.id}/>)
+      return (<Tab label={state.name} value={state.id} />)
 
     })
   }
@@ -71,7 +72,7 @@ const EditorBlock = (props: PropsFromRedux) => {
     <Container>
       <Header>
         <StyledTabs
-          value={value}
+          value={currentId}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
@@ -80,12 +81,12 @@ const EditorBlock = (props: PropsFromRedux) => {
         </StyledTabs>
       </Header>
       <Wrapper>
-      
-          <Editor id={value} content={
 
-            editorState[editorState.findIndex(state=>state.id===value)]?.content
-            
-            }/>
+        <Editor id={currentId} content={
+
+          editorState[editorState.findIndex(state => state.id === currentId)]?.content
+
+        } />
       </Wrapper>
     </Container>
   );

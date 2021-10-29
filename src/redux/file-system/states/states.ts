@@ -1,5 +1,7 @@
 export type fileSystemStateChild = Array<string>;
 
+
+
 export interface fileSystemStateNode {
     readonly id: string,
     readonly name: string,
@@ -21,11 +23,13 @@ export interface fileState{
     readonly id:string;
     readonly name:string;
     readonly content:string;
+    readonly type : "new" | "standalone" | "folder" ; 
 
 }
 
 export interface editorState {
-    readonly editorState: Array<fileState> //[id,content]
+    readonly editorState: Array<fileState>; //[id,content]
+    readonly currentId: string|null;
 }
 
 

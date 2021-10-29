@@ -1,4 +1,5 @@
 import { searchTable } from "file-system";
+import { fileState } from "../states/states";
 
 export enum ActionType {
     //File System ralated action types
@@ -8,22 +9,20 @@ export enum ActionType {
     NEW_EDITOR = "new_editor",
     IMPORT_FOLDER = 'import_folder',
     SAVE = 'save',
+    SAVE_AS = 'save_as',
     COPY = 'copy',
     PASTY = 'paste',
     MOVE = 'move',
     DELETE = 'delete',
-
+    NEW_FILE = 'new_file',
+    SET_CURRENT_ID = 'set_current_id',
     // not used
     // REFRESH = 'refresh',
     // EXPAND_FOLDER = 'expand_folder',
     // CONTRACT_FOLDER = 'contract_folder',
 }
 
-export type fileArrayType = Array<{
-    id: string;
-    name: string;
-    content: string;
-}>
+export type fileArrayType = Array<fileState>
 
 
 //File System ralated actions 
@@ -38,13 +37,27 @@ export interface ImportFolderAction {
     };
 }
 
-export interface SaveAction {
+export interface Save {
     type: ActionType.SAVE;
     payload: {
-        id: number;
-        to: number;
+        id: string;
     }
 }
+
+export interface SetCurrentId {
+    type: ActionType.SET_CURRENT_ID;
+    payload: {
+        id: string;
+    }
+}
+
+export interface SaveAs {
+    type: ActionType.SAVE_AS;
+    payload: {
+        id: string;
+    }
+}
+
 
 export interface Open {
     type: ActionType.OPEN;
@@ -66,6 +79,13 @@ export interface NewEditor {
     type: ActionType.NEW_EDITOR;
     payload: {
         fileArray: fileArrayType
+    }
+}
+
+export interface NewFile {
+    type: ActionType.NEW_FILE;
+    payload: {
+        id: string;
     }
 }
 
@@ -106,10 +126,13 @@ export type Action =
     | GetDirectoryHandler
     | Open
     | NewEditor
-    | SaveAction
+    | Save
+    | SaveAs
+    | SetCurrentId
     | CopyAction
     | PasteAction
     | MoveAction
     | DeleteAction
     | OpenTreeItem
+    | NewFile
     ;

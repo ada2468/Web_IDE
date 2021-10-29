@@ -18,7 +18,7 @@ export interface searchTable {
 }
 
 export interface fileTable {
-    [id: string]: FileSystemFileHandle,
+    [id: string]: FileSystemFileHandle | null,
 }
 
 class FileSystem {
@@ -77,7 +77,7 @@ class FileSystem {
                     }
                 }
                 ancestor['children'].push(node);
-                ancestor['children'].sort(this.#compareFileSystemTree)
+                ancestor['children'].sort(this.#compareFileSystemTree);
                 this.#searchTable[uuid] = node;
             }
         } catch {
@@ -96,8 +96,23 @@ class FileSystem {
     getfileTable() {
         return this.#fileTable;
     }
-    showRootHandler() {
+    getRootHandler() {
         return this.#rootHandler;
+    }
+
+    idToFileHandler(id: string) {
+        if (this.#fileTable[id]) return this.#fileTable[id];
+        if (this.#searchTable[id]) {
+            const fileNode = this.#searchTable[id] as fileSystemNode;
+            return fileNode.handle;
+        }
+        return null;
+    }
+
+    createNewFilePlaceHolder() {
+        const id = uuidv4();
+        this.#fileTable[id] = null;
+        return id;
     }
 
     async importFolder() {
@@ -120,29 +135,34 @@ class FileSystem {
         const idArray: Array<string> = [];
         let uuid: string;
         for (let fileHandler of fileHandlers) {
-            uuid = uuidv4();
-            this.#fileTable[uuid] = fileHandler;
+            if (this.#rootHandler?.resolve(fileHandler)) {
+
+            } else {
+                uuid = uuidv4();
+                this.#fileTable[uuid] = fileHandler;
+            }
+
             idArray.push(uuid);
         }
         return idArray;
     }
 
     async readFileContent(fileHandlers: Array<FileSystemFileHandle>) {
-        const contentArray: Array<{name:string,content:string}> = [];
+        const contentArray: Array<{ name: string, content: string }> = [];
         let file: File;
         let content: string;
-        let name:string;
+        let name: string;
         for (let fileHandler of fileHandlers) {
             file = await fileHandler.getFile();
             content = await file.text();
             name = file.name;
-            contentArray.push({name,content});
+            contentArray.push({ name, content });
         }
         return contentArray;
     }
 
 
-    //to-do:implement checkDuplicateOpen - 1 check in directory and 2 check already opened
+    //to-do:implement checkDuplicateOpen - 1 check in directory and already opened
 
     //Static
     //File Access API requires its picker methods to be invoked directly 
@@ -155,7 +175,24 @@ class FileSystem {
         return await window.showOpenFilePicker();// to add try-catch block
     }
 
-    static showRootHandler = () => FileSystem.#instance.showRootHandler();
+    static showRootHandler = () => FileSystem.#instance.getRootHandler();
+
+    static async getNewFileHandle() {
+        const options = {
+            types: [
+                {
+                    description: 'Text Files',
+                    accept: {
+                        'text/plain': ['.txt'],
+                    },
+                },
+            ],
+        };
+        const handle = await window.showSaveFilePicker(options);
+        return handle;
+    };
+
+
 
 }
 export default FileSystem;

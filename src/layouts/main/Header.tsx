@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import {
   Menu,
@@ -8,9 +8,9 @@ import {
   MenuItem
 } from "@reach/menu-button";
 import "@reach/menu-button/styles.css";
-
+import { RootState } from 'redux/reducers';
 import actions from 'redux/actions';
-import FileSystem from 'file-system';
+import FileSystem, { FileSystemInstance } from 'file-system';
 
 export const HEADER_HEIGHT = '2.5rem';
 
@@ -44,6 +44,10 @@ color:${props => props.theme.white};
 
 export const Header: React.FC = () => {
   const dispatch = useDispatch();
+  const currentId = useSelector((state: RootState): string => state.fileSystem.currentId);
+  const fileType = useSelector((state: RootState) => state.fileSystem.editorState.find(file => file.id === currentId)?.type);
+
+  const reduxState = useSelector((state: RootState)=>state.fileSystem);
 
   const onOpenDirectory = async () => {
     await FileSystem.getRootDirectoryHandler();
@@ -55,6 +59,36 @@ export const Header: React.FC = () => {
     dispatch(actions.open(fileHandler));
   }
 
+  const onCreate = async () => {
+    const id = FileSystemInstance.createNewFilePlaceHolder();
+    dispatch(actions.newFile(id));
+  }
+
+  const onSave = async () => {
+    console.log(currentId);
+    if (fileType === "new") {
+      const fileHandler = await FileSystem.getNewFileHandle();
+    } else {
+      const fileHandler = FileSystemInstance.idToFileHandler(currentId);
+    }
+
+
+
+  }
+
+  const onSaveAs = async () => {
+    const newFileHandler = await FileSystem.getNewFileHandle();
+    console.log(currentId);
+
+  }
+
+  const onCheck = async () => {
+    const fileHandler = FileSystemInstance.idToFileHandler(currentId);
+    const directory = FileSystemInstance.getRootHandler();
+    const path =  await directory.resolve(fileHandler);
+    console.log(path);
+  }
+
   return (
     <Container>
       <div style={{ width: "0.5rem" }}>{title}</div>
@@ -62,13 +96,33 @@ export const Header: React.FC = () => {
         <MenuButton>
           File
         </MenuButton>
+
         <MenuList>
+
+          <MenuItem onSelect={onCreate}>
+            New File
+          </MenuItem>
+
           <MenuItem onSelect={onOpenFile}>
-            Open...
+            Open File...
           </MenuItem>
+
           <MenuItem onSelect={onOpenDirectory}>
-            Open Directory...
+            Open Folder...
           </MenuItem>
+
+          <MenuItem onSelect={onSave}>
+            Save
+          </MenuItem>
+
+          <MenuItem onSelect={onSaveAs}>
+            Save As...
+          </MenuItem>
+
+          <MenuItem onSelect={onCheck}>
+            Check in folder...
+          </MenuItem>
+
         </MenuList>
       </Menu>
     </Container >
