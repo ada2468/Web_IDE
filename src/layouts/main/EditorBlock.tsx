@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-
-
+import { RootState } from 'redux/reducers';
+import { connect, ConnectedProps } from 'react-redux';
 import Editor from 'components/Editor';
+
 const Container = styled.div`
   width: 25rem;
   min-width: 25rem;
@@ -43,13 +44,28 @@ const StyledTabs = styled(({ children, ...other }) =>
   }
 `
 
-export const EditorBlock: React.FC = ({ children }) => {
+const mapState = (state: RootState) => {
+  return { 'editorState': state.fileSystem.editorState };
+}
 
-  const [value, setValue] = React.useState(0);
+const EditorBlock = (props: PropsFromRedux) => {
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const { editorState } = props;
+  type editorStateType = typeof editorState;
+  const [value, setValue] = React.useState("");
+
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
+
+  const createTab = (editorState: editorStateType = []) => {
+    return editorState.map((state, index) => {
+      return (<Tab label={state.name} value={state.id}/>)
+
+    })
+  }
+
 
   return (
     <Container>
@@ -59,17 +75,21 @@ export const EditorBlock: React.FC = ({ children }) => {
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
-          disableRipple
         >
-          <Tab disableRipple label="Item One" />
-          <Tab disableRipple label="Item Two" />
-          <Tab disableRipple label="Item Three" />
+          {createTab(editorState)};
         </StyledTabs>
       </Header>
       <Wrapper>
-        <Editor />
+      
+          <Editor id={value} content={
+
+            editorState[editorState.findIndex(state=>state.id===value)]?.content
+            
+            }/>
       </Wrapper>
     </Container>
   );
-}
-
+};
+const connector = connect(mapState);
+type PropsFromRedux = ConnectedProps<typeof connector>;
+export default connector(EditorBlock);

@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
-
-import { fileSystemState } from 'redux/file-system/states/states';
+import { RootState } from 'redux/reducers';
 import FileSystemDisplay from 'components/FileSystemDisplay';
+import { stateType } from 'redux/file-system/states/states';
 
 const Container = styled.div`
   width: 10rem;
@@ -29,16 +29,14 @@ const Wrapper = styled.div`
   overflow-y: auto;
 `;
 
-interface Props extends PropsFromRedux{}
-
-const mapState = (state: fileSystemState) => state;
-const Sider = (props) => {
-  const fileSystemState = props.fileSystem as fileSystemState;
+const mapState = (state: RootState) => state;
+const Sider = (props:PropsFromRedux) => {
+  const fileSystemState = props.fileSystem;
   return (
   <Container>
     <Header>{"Explorer"}</Header>
     <Wrapper>
-      <FileSystemDisplay fileSystem={fileSystemState}/>
+      <FileSystemDisplay fileSystem={fileSystemState as stateType}/>
     </Wrapper>
   </Container>)
 };

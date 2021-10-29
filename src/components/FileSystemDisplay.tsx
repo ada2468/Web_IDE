@@ -3,26 +3,23 @@ import styled from 'styled-components';
 import TreeView from '@material-ui//lab/TreeView';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import TreeItem from '@material-ui/lab/TreeItem';
-import { fileSystemState, fileSystemStateNode, fileSystemStateTable } from 'redux/file-system/states/states';
+import TreeItem from 'components/FileDisplay/TreeItem';
+import { stateType, fileSystemStateNode, fileSystemStateTable ,fileState } from 'redux/file-system/states/states';
 
-interface Props {
-    fileSystem: fileSystemState
-}
+interface Props { fileSystem: stateType };
 
 const FileSystemDisplay = ({ fileSystem }: Props) => {
 
-    const renderTree = (node: fileSystemStateNode, table: fileSystemStateTable) => {
-        if (!node) return []
+    const renderTree = (node: fileSystemStateNode, table: fileSystemStateTable, editorState:Array<fileState>) => {
+        if (!node) return [];
         let tree: Array<JSX.Element> = [
             (
-                <TreeItem key={node.id} nodeId={node.id} label={node.name}>
+                <TreeItem key={node.id} node={node} editorState={editorState}>
                     {"children" in node && Array.isArray(node.children) ? node.children.map((childId) => {
-                        return renderTree(table[childId], table)
+                        return renderTree(table[childId], table, editorState)
                     }) : []}
                 </TreeItem>
             )]
-
         return tree;
     };
 
@@ -30,7 +27,7 @@ const FileSystemDisplay = ({ fileSystem }: Props) => {
         defaultCollapseIcon={<ExpandMoreIcon />}
         defaultExpandIcon={<ChevronRightIcon />}
     >
-        {fileSystem.rootId !== "" ? renderTree(fileSystem.table[fileSystem.rootId], fileSystem.table) : []}
+        {fileSystem.rootId !== "" ? renderTree(fileSystem.fileSystemState[fileSystem.rootId], fileSystem.fileSystemState, fileSystem.editorState) : []}
     </TreeView>);
 
     return (

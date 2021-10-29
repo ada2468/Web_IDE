@@ -4,7 +4,7 @@ import { colors } from 'theme/colors';
 
 import { Header } from './main/Header';
 import Sider from './main/Sider';
-import { EditorBlock } from './main/EditorBlock';
+import EditorBlock from './main/EditorBlock';
 import { BrowserBlock } from './main/BrowserBlock';
 const GlobalStyles = createGlobalStyle<{ theme: any }>`
   html,
@@ -20,8 +20,6 @@ const GlobalStyles = createGlobalStyle<{ theme: any }>`
       Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
       sans-serif;
 
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     color: ${props => props.theme.white};
     font-size: 16px !important;

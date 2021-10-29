@@ -3,28 +3,28 @@ import { v4 as uuidv4 } from 'uuid';
 export interface fileSystemFileNode {
     id: string,
     handle: FileSystemHandle,
-    ancestor?: fileSystemNode
+    ancestor?: fileSystemNode,
 }
 
 export interface fileSystemDirectoryNode extends fileSystemFileNode {
     children: fileSystemTree,
 }
 
-
 export type fileSystemNode = fileSystemDirectoryNode | fileSystemFileNode;
 export type fileSystemTree = fileSystemNode[];
-export interface searchTable  {
-    [id:string]:fileSystemNode|string,
-    rootId?:string,
+export interface searchTable {
+    [id: string]: fileSystemNode | string,
+    rootId?: string,
 }
 
-
-
-
+export interface fileTable {
+    [id: string]: FileSystemFileHandle,
+}
 
 class FileSystem {
     #fileSystemTree: fileSystemTree = [];
     #rootHandler: FileSystemDirectoryHandle;
+    #fileTable: fileTable = {};
     #searchTable: searchTable = {};
     static #instance: FileSystem;
 
@@ -46,11 +46,12 @@ class FileSystem {
             return compA.localeCompare(compB) > 0 ? -1 : 1
         }
     }
+
     #setRootHandler = (rootHandler: FileSystemDirectoryHandle) => { this.#rootHandler = rootHandler }
 
     #recursiveScanFolder = async (
         ancestor: fileSystemDirectoryNode
-        ) => {
+    ) => {
         let node: fileSystemNode;
         let uuid: string;
 
@@ -67,7 +68,7 @@ class FileSystem {
                         ancestor: ancestor,
                         children: []
                     }
-                    await this.#recursiveScanFolder.call(this,node);
+                    await this.#recursiveScanFolder.call(this, node);
                 } else {
                     node = {
                         handle: handle,
@@ -77,7 +78,7 @@ class FileSystem {
                 }
                 ancestor['children'].push(node);
                 ancestor['children'].sort(this.#compareFileSystemTree)
-                this.#searchTable[uuid]=node;
+                this.#searchTable[uuid] = node;
             }
         } catch {
             //console.log(dirHandle)
@@ -92,6 +93,9 @@ class FileSystem {
     getSearchTable() {
         return this.#searchTable;
     }
+    getfileTable() {
+        return this.#fileTable;
+    }
     showRootHandler() {
         return this.#rootHandler;
     }
@@ -105,19 +109,53 @@ class FileSystem {
             children: []
         }
 
-        this.#searchTable[rootNode.id]=rootNode;
-        this.#searchTable['rootId']=rootNode.id;
-        await this.#recursiveScanFolder.call(this,rootNode);
+        this.#searchTable[rootNode.id] = rootNode;
+        this.#searchTable['rootId'] = rootNode.id;
+        await this.#recursiveScanFolder.call(this, rootNode);
         this.#fileSystemTree.push(rootNode);
     }
 
+    //Potential Problem: same file opened.
+    storeFileHandlers(fileHandlers: Array<FileSystemFileHandle>) {
+        const idArray: Array<string> = [];
+        let uuid: string;
+        for (let fileHandler of fileHandlers) {
+            uuid = uuidv4();
+            this.#fileTable[uuid] = fileHandler;
+            idArray.push(uuid);
+        }
+        return idArray;
+    }
+
+    async readFileContent(fileHandlers: Array<FileSystemFileHandle>) {
+        const contentArray: Array<{name:string,content:string}> = [];
+        let file: File;
+        let content: string;
+        let name:string;
+        for (let fileHandler of fileHandlers) {
+            file = await fileHandler.getFile();
+            content = await file.text();
+            name = file.name;
+            contentArray.push({name,content});
+        }
+        return contentArray;
+    }
+
+
+    //to-do:implement checkDuplicateOpen - 1 check in directory and 2 check already opened
+
     //Static
+    //File Access API requires its picker methods to be invoked directly 
     static getRootDirectoryHandler = async () => {
         const rootHandler = await window.showDirectoryPicker();// to add try-catch block
         FileSystem.#instance.#setRootHandler(rootHandler)
     }
-    static showRootHandler = () => FileSystem.#instance.showRootHandler();
 
+    static getFileHandler = async () => {
+        return await window.showOpenFilePicker();// to add try-catch block
+    }
+
+    static showRootHandler = () => FileSystem.#instance.showRootHandler();
 
 }
 export default FileSystem;

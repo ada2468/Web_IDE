@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import {
   Menu,
@@ -10,8 +10,7 @@ import {
 import "@reach/menu-button/styles.css";
 
 import actions from 'redux/actions';
-import { ActionType } from 'redux/actions';
-import FileSystem, {FileSystemInstance} from 'file-system';
+import FileSystem from 'file-system';
 
 export const HEADER_HEIGHT = '2.5rem';
 
@@ -51,6 +50,11 @@ export const Header: React.FC = () => {
     dispatch(actions.getDirHandler());
   }
 
+  const onOpenFile = async () => {
+    const fileHandler = await FileSystem.getFileHandler();
+    dispatch(actions.open(fileHandler));
+  }
+
   return (
     <Container>
       <div style={{ width: "0.5rem" }}>{title}</div>
@@ -59,7 +63,7 @@ export const Header: React.FC = () => {
           File
         </MenuButton>
         <MenuList>
-          <MenuItem onSelect={() => { alert("1") }}>
+          <MenuItem onSelect={onOpenFile}>
             Open...
           </MenuItem>
           <MenuItem onSelect={onOpenDirectory}>

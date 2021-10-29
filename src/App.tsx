@@ -28,7 +28,7 @@ const App: React.FC = () => {
     esbuild.initialize({
       wasmURL: './node_modules/esbuild-wasm/esbuild.wasm',
       worker: true
-    }).catch()
+    }).catch(()=>{console.log("esbuild initialize more than once!")})
   }, [])
 
   return (

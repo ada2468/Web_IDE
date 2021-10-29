@@ -3,18 +3,20 @@ import MonacoEditor from '@monaco-editor/react';
 
 interface Props{
   id:string,
+  content:string,
 }
 
-const Editor = ()=>{
+const Editor = ({id, content}:Props)=>{
 
 
     return(
       <MonacoEditor
         //editorDidMount={onEditorDidMount}
-        value={'initialValue'}
+        value={content}
         theme="vs-dark"
-        language="javascript"
+        language="typescript"
         height="90%"
+        path={id}
         options={{
           wordWrap: 'on',
           minimap: { enabled: false },
