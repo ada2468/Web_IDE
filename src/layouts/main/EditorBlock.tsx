@@ -2,13 +2,15 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
 import { RootState } from 'redux/reducers';
-import { setCurrentId } from 'redux/actions';
+import { setCurrentId, closeEditor } from 'redux/actions';
 import { connect, ConnectedProps } from 'react-redux';
 import Editor from 'components/Editor';
 
+
 const Container = styled.div`
-  width: 25rem;
+  width: 100%;
   min-width: 25rem;
   height: 100%;
   border-right: 1px solid ${props => props.theme.bg3};
@@ -46,7 +48,7 @@ const StyledTabs = styled(({ children, ...other }) =>
 `
 
 const mapState = (state: RootState) => {
-  return { 'editorState': state.fileSystem.editorState, 'currentId':state.fileSystem.currentId };
+  return { 'editorState': state.fileSystem.editorState, 'currentId': state.fileSystem.currentId };
 }
 
 const EditorBlock = (props: PropsFromRedux) => {
@@ -56,13 +58,24 @@ const EditorBlock = (props: PropsFromRedux) => {
 
 
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = ( event:React.SyntheticEvent, newValue: string) => {
+    console.log("yee2")
     props.dispatch(setCurrentId(newValue));
+
   };
+
+  const handleTabClick = (event: React.SyntheticEvent,id: string) =>{
+    event.stopPropagation();
+    props.dispatch(closeEditor(id))
+  }
 
   const createTab = (editorState: editorStateType = []) => {
     return editorState.map((state, index) => {
-      return (<Tab label={state.name} value={state.id} />)
+      const content = <div>
+        <span>{state.name}</span>
+        <CloseOutlinedIcon fontSize={"small"} viewBox={"-3 -7 26 26"} onClick={(e:React.SyntheticEvent)=>handleTabClick(e,state.id)} />
+      </div>;
+      return (<Tab label={content} value={state.id} />)
 
     })
   }
@@ -83,9 +96,7 @@ const EditorBlock = (props: PropsFromRedux) => {
       <Wrapper>
 
         <Editor id={currentId} content={
-
           editorState[editorState.findIndex(state => state.id === currentId)]?.content
-
         } />
       </Wrapper>
     </Container>

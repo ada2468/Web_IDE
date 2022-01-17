@@ -71,7 +71,8 @@ const Layout: FunctionComponent = () => {
         <Wrapper>
           <Sider></Sider>
           <EditorBlock></EditorBlock>
-          <BrowserBlock></BrowserBlock>
+          {//<BrowserBlock></BrowserBlock>
+          }
         </Wrapper>
       </Main>
     </ThemeProvider>

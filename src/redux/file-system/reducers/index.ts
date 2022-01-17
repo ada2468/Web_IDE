@@ -1,9 +1,9 @@
 import { produce, Draft } from 'immer';
 import { fileSystemStateTable, fileSystemState, stateType, fileSystemStateNode } from "../states/states";
-import { searchTable, fileSystemNode } from 'file-system';
+import { searchTable, fileSystemNode, FileSystemInstance } from 'file-system';
 import { ActionType, Action } from "../actions";
 
-const initialState: stateType = { rootId: "", fileSystemState: {}, editorState: [], currentId:null };
+const initialState: stateType = { rootId: "", fileSystemState: {}, editorState: [], currentId: null };
 
 /*
 function createFileSystemState: generate new state from the info from file system 
@@ -41,30 +41,43 @@ const reducer = produce((state: Draft<stateType> = initialState, action: Action)
         //action: import folder
         case ActionType.IMPORT_FOLDER:
             const { searchTable } = action.payload;
-            return { ...createFileSystemState(searchTable), editorState: [], currentId:null };
+            return { ...createFileSystemState(searchTable), editorState: [], currentId: null };
 
         case ActionType.NEW_EDITOR:
             const { fileArray } = action.payload;
             fileArray.forEach(fileState => {
-                state.editorState.push({id:fileState.id,name:fileState.name,content:fileState.content, type:fileState.type});
-                state.currentId  = fileState.id;
+                state.editorState.push({ id: fileState.id, name: fileState.name, content: fileState.content, type: fileState.type });
+                state.currentId = fileState.id;
             });
+            return state;
+
+        case ActionType.CLOSE_EDITOR:
+            const id: string = action.payload.id;
+            const editorState = state.editorState;
+            FileSystemInstance.removeFileFromFileTable(id);
+            const index = editorState.findIndex(state => state.id ===id);
+            if (index !== -1) editorState.splice(index,1);
+            if (index < editorState.length) state.currentId = editorState[index].id;
+            else state.currentId = null;
+            
             return state;
 
         case ActionType.NEW_FILE:
             state.editorState.push(
-                {id:action.payload.id,
-                name:"New File",
-                content:"",
-                type:"new"}
+                {
+                    id: action.payload.id,
+                    name: "New File",
+                    content: "",
+                    type: "new"
+                }
             )
-            
+
             return state;
 
         case ActionType.SET_CURRENT_ID:
             state.currentId = action.payload.id;
             return state;
-            
+
         default:
             return state;
     }

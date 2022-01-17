@@ -6,7 +6,7 @@ import FileSystemDisplay from 'components/FileSystemDisplay';
 import { stateType } from 'redux/file-system/states/states';
 
 const Container = styled.div`
-  width: 10rem;
+  width: 20rem;
   min-width: 10rem;
   height: 100%;
   border-right: 1px solid ${props => props.theme.bg3};

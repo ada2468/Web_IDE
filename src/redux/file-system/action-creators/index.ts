@@ -6,9 +6,11 @@ import {
     Open,
     SetCurrentId,
     NewEditor,
+    CloseEditor,
     fileArrayType,
     OpenTreeItem,
     NewFile,
+    SaveAs,
     ActionType
 } from '../actions';
 
@@ -50,6 +52,15 @@ export const newEditor = (fileArray: fileArrayType): NewEditor => {
     }
 }
 
+export const closeEditor = (id: string): CloseEditor => {
+    return {
+        type: ActionType.CLOSE_EDITOR,
+        payload: {
+            id
+        }
+    }
+}
+
 export const openTreeItem = (fileHandler: Array<FileSystemFileHandle>, id: Array<string>): OpenTreeItem => {
     return {
         type: ActionType.OPEN_TREE_ITEM,
@@ -61,20 +72,29 @@ export const openTreeItem = (fileHandler: Array<FileSystemFileHandle>, id: Array
 
 }
 
-export const newFile = (id:string): NewFile =>{
-    return{
-        type:ActionType.NEW_FILE,
-        payload:{
+export const newFile = (id: string): NewFile => {
+    return {
+        type: ActionType.NEW_FILE,
+        payload: {
             id
         }
     }
 }
 
-export const setCurrentId = (id:string):SetCurrentId =>{
-    return{
-        type:ActionType.SET_CURRENT_ID,
-        payload:{
+export const setCurrentId = (id: string): SetCurrentId => {
+    return {
+        type: ActionType.SET_CURRENT_ID,
+        payload: {
             id
+        }
+    }
+}
+
+export const saveAs = (handler: FileSystemFileHandle): SaveAs => {
+    return {
+        type: ActionType.SAVE_AS,
+        payload: {
+            handler
         }
     }
 }

@@ -7,6 +7,7 @@ export enum ActionType {
     OPEN = 'open',
     OPEN_TREE_ITEM = 'open_tree_item',
     NEW_EDITOR = "new_editor",
+    CLOSE_EDITOR = "close_editor",
     IMPORT_FOLDER = 'import_folder',
     SAVE = 'save',
     SAVE_AS = 'save_as',
@@ -16,6 +17,7 @@ export enum ActionType {
     DELETE = 'delete',
     NEW_FILE = 'new_file',
     SET_CURRENT_ID = 'set_current_id',
+
     // not used
     // REFRESH = 'refresh',
     // EXPAND_FOLDER = 'expand_folder',
@@ -54,7 +56,7 @@ export interface SetCurrentId {
 export interface SaveAs {
     type: ActionType.SAVE_AS;
     payload: {
-        id: string;
+        handler: FileSystemFileHandle;
     }
 }
 
@@ -79,6 +81,13 @@ export interface NewEditor {
     type: ActionType.NEW_EDITOR;
     payload: {
         fileArray: fileArrayType
+    }
+}
+
+export interface CloseEditor {
+    type: ActionType.CLOSE_EDITOR;
+    payload: {
+        id:string
     }
 }
 
@@ -126,6 +135,7 @@ export type Action =
     | GetDirectoryHandler
     | Open
     | NewEditor
+    | CloseEditor
     | Save
     | SaveAs
     | SetCurrentId

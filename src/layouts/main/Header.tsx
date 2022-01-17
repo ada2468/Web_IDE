@@ -47,16 +47,20 @@ export const Header: React.FC = () => {
   const currentId = useSelector((state: RootState): string => state.fileSystem.currentId);
   const fileType = useSelector((state: RootState) => state.fileSystem.editorState.find(file => file.id === currentId)?.type);
 
-  const reduxState = useSelector((state: RootState)=>state.fileSystem);
+  const reduxState = useSelector((state: RootState) => state.fileSystem);
 
   const onOpenDirectory = async () => {
-    await FileSystem.getRootDirectoryHandler();
-    dispatch(actions.getDirHandler());
+    const rootHandler = await FileSystem.getRootDirectoryHandler();
+    if (rootHandler) {
+      dispatch(actions.getDirHandler());
+    }
   }
 
   const onOpenFile = async () => {
     const fileHandler = await FileSystem.getFileHandler();
-    dispatch(actions.open(fileHandler));
+    if (fileHandler) {
+      dispatch(actions.open(fileHandler));
+    }
   }
 
   const onCreate = async () => {
@@ -78,14 +82,14 @@ export const Header: React.FC = () => {
 
   const onSaveAs = async () => {
     const newFileHandler = await FileSystem.getNewFileHandle();
-    console.log(currentId);
+    dispatch(actions.saveAs(newFileHandler));
 
   }
 
   const onCheck = async () => {
     const fileHandler = FileSystemInstance.idToFileHandler(currentId);
     const directory = FileSystemInstance.getRootHandler();
-    const path =  await directory.resolve(fileHandler);
+    const path = await directory.resolve(fileHandler);
     console.log(path);
   }
 
@@ -117,10 +121,6 @@ export const Header: React.FC = () => {
 
           <MenuItem onSelect={onSaveAs}>
             Save As...
-          </MenuItem>
-
-          <MenuItem onSelect={onCheck}>
-            Check in folder...
           </MenuItem>
 
         </MenuList>
