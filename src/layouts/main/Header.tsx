@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
 import {
   Menu,
@@ -40,14 +40,17 @@ const MenuList = styled(DefaultMenuList)`
 background-color: ${props => props.theme.bg3};
 color:${props => props.theme.white};
 `
+const mapState = (state: RootState) => {
+  return { 'editorState': state.fileSystem.editorState, 'currentIndex': state.fileSystem.currentIndex };
+}
 
-
-export const Header: React.FC = () => {
+const Header = (props: PropsFromRedux) => {
   const dispatch = useDispatch();
-  const currentId = useSelector((state: RootState): string => state.fileSystem.currentId);
-  const fileType = useSelector((state: RootState) => state.fileSystem.editorState.find(file => file.id === currentId)?.type);
+  const { editorState, currentIndex } = props
+  const currentId = editorState[currentIndex]?.id;
+  const fileType = editorState.find(file => file.id === currentId)?.type;
 
-  const reduxState = useSelector((state: RootState) => state.fileSystem);
+  //const reduxState = useSelector((state: RootState) => state.fileSystem);
 
   const onOpenDirectory = async () => {
     const rootHandler = await FileSystem.getRootDirectoryHandler();
@@ -69,29 +72,20 @@ export const Header: React.FC = () => {
   }
 
   const onSave = async () => {
-    console.log(currentId);
-    if (fileType === "new") {
-      const fileHandler = await FileSystem.getNewFileHandle();
-    } else {
-      const fileHandler = FileSystemInstance.idToFileHandler(currentId);
-    }
-
-
-
+    dispatch(actions.save());
   }
 
   const onSaveAs = async () => {
     const newFileHandler = await FileSystem.getNewFileHandle();
     dispatch(actions.saveAs(newFileHandler));
-
   }
 
-  const onCheck = async () => {
-    const fileHandler = FileSystemInstance.idToFileHandler(currentId);
-    const directory = FileSystemInstance.getRootHandler();
-    const path = await directory.resolve(fileHandler);
-    console.log(path);
-  }
+  /*   const onCheck = async () => {
+      const fileHandler = FileSystemInstance.idToFileHandler(currentId);
+      const directory = FileSystemInstance.getRootHandler();
+      const path = await directory.resolve(fileHandler);
+      console.log(path);
+    } */
 
   return (
     <Container>
@@ -128,3 +122,8 @@ export const Header: React.FC = () => {
     </Container >
   );
 };
+
+const connector = connect(mapState);
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export default connector(Header);

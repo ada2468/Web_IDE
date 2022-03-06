@@ -1,11 +1,11 @@
 import { FunctionComponent } from 'react';
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { colors } from 'theme/colors';
-
-import { Header } from './main/Header';
+import Header from './main/Header';
 import Sider from './main/Sider';
 import EditorBlock from './main/EditorBlock';
 import { BrowserBlock } from './main/BrowserBlock';
+
 const GlobalStyles = createGlobalStyle<{ theme: any }>`
   html,
   body {

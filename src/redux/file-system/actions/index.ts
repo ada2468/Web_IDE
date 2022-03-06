@@ -2,30 +2,28 @@ import { searchTable } from "file-system";
 import { fileState } from "../states/states";
 
 export enum ActionType {
-    //File System ralated action types
     GET_DIRECTORY_HANDLER = 'get_directory_handler',
     OPEN = 'open',
     OPEN_TREE_ITEM = 'open_tree_item',
     NEW_EDITOR = "new_editor",
     CLOSE_EDITOR = "close_editor",
     IMPORT_FOLDER = 'import_folder',
+    CHANGE_EDITOR_CONTENT = "change_editor_content",
     SAVE = 'save',
     SAVE_AS = 'save_as',
+    SAVE_AS_STATE_UPDATE = 'update_current_fs_state',
     COPY = 'copy',
     PASTY = 'paste',
     MOVE = 'move',
     DELETE = 'delete',
     NEW_FILE = 'new_file',
-    SET_CURRENT_ID = 'set_current_id',
+    SET_CURRENT_INDEX = 'set_current_index',
 
     // not used
     // REFRESH = 'refresh',
-    // EXPAND_FOLDER = 'expand_folder',
-    // CONTRACT_FOLDER = 'contract_folder',
 }
 
 export type fileArrayType = Array<fileState>
-
 
 //File System ralated actions 
 export interface GetDirectoryHandler {
@@ -42,24 +40,32 @@ export interface ImportFolderAction {
 export interface Save {
     type: ActionType.SAVE;
     payload: {
-        id: string;
     }
 }
 
-export interface SetCurrentId {
-    type: ActionType.SET_CURRENT_ID;
+export interface SetCurrentIndex {
+    type: ActionType.SET_CURRENT_INDEX;
     payload: {
-        id: string;
+        index: number;
     }
 }
 
 export interface SaveAs {
     type: ActionType.SAVE_AS;
     payload: {
-        handler: FileSystemFileHandle;
+        destinationHandler: FileSystemFileHandle
     }
 }
 
+export interface SaveAsStateUpdate {
+    type: ActionType.SAVE_AS_STATE_UPDATE;
+    payload: {
+        ancestorId: string,
+        desId: string,
+        desName: string,
+        desType: string
+    }
+}
 
 export interface Open {
     type: ActionType.OPEN;
@@ -84,10 +90,17 @@ export interface NewEditor {
     }
 }
 
+export interface ChangeEditorContent{
+    type: ActionType.CHANGE_EDITOR_CONTENT;
+    payload: {
+        content: string
+    }
+}
+
 export interface CloseEditor {
     type: ActionType.CLOSE_EDITOR;
     payload: {
-        id:string
+        index: number
     }
 }
 
@@ -138,11 +151,13 @@ export type Action =
     | CloseEditor
     | Save
     | SaveAs
-    | SetCurrentId
+    | SetCurrentIndex
     | CopyAction
     | PasteAction
     | MoveAction
     | DeleteAction
     | OpenTreeItem
     | NewFile
+    | SaveAsStateUpdate
+    | ChangeEditorContent
     ;

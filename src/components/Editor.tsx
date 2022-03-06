@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import MonacoEditor from '@monaco-editor/react';
+import React from 'react';
+import MonacoEditor, { OnChange } from '@monaco-editor/react';
 
 interface Props {
   id: string,
   content: string,
+  onChange: OnChange
 }
 
-const Editor = ({ id, content }: Props) => {
+const Editor = ({ id, content, onChange }: Props) => {
 
   return (
     <MonacoEditor
       //editorDidMount={onEditorDidMount}
       value={content}
+      onChange={onChange}
       theme="vs-dark"
       language="typescript"
       height="90%"

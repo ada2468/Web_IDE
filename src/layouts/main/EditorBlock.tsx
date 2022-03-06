@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
 import { RootState } from 'redux/reducers';
-import { setCurrentId, closeEditor } from 'redux/actions';
+import { setCurrentIndex, closeEditor, changeEditorContent } from 'redux/actions';
 import { connect, ConnectedProps } from 'react-redux';
 import Editor from 'components/Editor';
+import { OnChange } from '@monaco-editor/react';
+
 
 
 const Container = styled.div`
@@ -48,34 +50,38 @@ const StyledTabs = styled(({ children, ...other }) =>
 `
 
 const mapState = (state: RootState) => {
-  return { 'editorState': state.fileSystem.editorState, 'currentId': state.fileSystem.currentId };
+  return { 'editorState': state.fileSystem.editorState, 'currentIndex': state.fileSystem.currentIndex };
 }
 
 const EditorBlock = (props: PropsFromRedux) => {
 
-  const { editorState, currentId } = props;
+  const { editorState, currentIndex } = props;
+  const currentId = editorState[currentIndex]?.id;
   type editorStateType = typeof editorState;
 
 
 
-  const handleChange = ( event:React.SyntheticEvent, newValue: string) => {
-    console.log("yee2")
-    props.dispatch(setCurrentId(newValue));
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    props.dispatch(setCurrentIndex(newValue));
 
   };
 
-  const handleTabClick = (event: React.SyntheticEvent,id: string) =>{
+  const handleTabClick = (event: React.SyntheticEvent, index: number) => {
     event.stopPropagation();
-    props.dispatch(closeEditor(id))
+    props.dispatch(closeEditor(index))
+  }
+
+  const handleEditorContentChange : OnChange = (value, e) =>{
+    props.dispatch(changeEditorContent(value));
   }
 
   const createTab = (editorState: editorStateType = []) => {
     return editorState.map((state, index) => {
       const content = <div>
         <span>{state.name}</span>
-        <CloseOutlinedIcon fontSize={"small"} viewBox={"-3 -7 26 26"} onClick={(e:React.SyntheticEvent)=>handleTabClick(e,state.id)} />
+        <CloseOutlinedIcon fontSize={"small"} viewBox={"-3 -7 26 26"} onClick={(e: React.SyntheticEvent) => handleTabClick(e, index)} />
       </div>;
-      return (<Tab label={content} value={state.id} />)
+      return (<Tab label={content} value={index} />)
 
     })
   }
@@ -85,7 +91,7 @@ const EditorBlock = (props: PropsFromRedux) => {
     <Container>
       <Header>
         <StyledTabs
-          value={currentId}
+          value={currentIndex}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
@@ -95,9 +101,10 @@ const EditorBlock = (props: PropsFromRedux) => {
       </Header>
       <Wrapper>
 
-        <Editor id={currentId} content={
-          editorState[editorState.findIndex(state => state.id === currentId)]?.content
-        } />
+        <Editor id={currentId}
+          content={editorState[editorState.findIndex(state => state.id === currentId)]?.content}
+          onChange={handleEditorContentChange}
+        />
       </Wrapper>
     </Container>
   );

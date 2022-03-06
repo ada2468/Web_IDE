@@ -22,6 +22,7 @@ export interface fileTable {
 }
 
 class FileSystem {
+    //combine fileSystemTree with searchTable in the futuer
     #fileSystemTree: fileSystemTree = [];
     #rootHandler: FileSystemDirectoryHandle;
     #fileTable: fileTable = {};
@@ -86,22 +87,28 @@ class FileSystem {
         return ancestor;
     };
 
-    //only for finding file
-    #findNodeFromPath(path: Array<string>, fileSystemTree: fileSystemTree) {
+    #findNodeFromPath(path: Array<string>, fileSystemTree: fileSystemTree, returnDirectoryIfNotFound: boolean = false): fileSystemNode {
         if (!path) { return null }
         let fileName = path.pop();
         let treeNode = fileSystemTree[0] as fileSystemDirectoryNode;
-        let folderHandler: fileSystemNode | undefined;
+        let folderNode: fileSystemNode | undefined;
         for (let folderName of path) {
-            folderHandler = treeNode.children.find(node => node.handle.kind === "directory" && node.handle.name === folderName)
-            if (folderHandler) {
-                treeNode = folderHandler as fileSystemDirectoryNode;
+            folderNode = treeNode.children.find(node => node.handle.kind === "directory" && node.handle.name === folderName)
+            if (folderNode) {
+                treeNode = folderNode as fileSystemDirectoryNode;
             }
             else { return null; }
         }
-        let fileHandler = treeNode.children.find(node => node.handle.kind === "file" && node.handle.name === fileName);
-        if (fileHandler) { return fileHandler }
-        else { return null }
+
+        let fileNode = treeNode.children.find(node => node.handle.kind === "file" && node.handle.name === fileName);
+        if (fileNode) { return fileNode }
+        else {
+            if (returnDirectoryIfNotFound === false) {
+                return null
+            } else {
+                return treeNode
+            }
+        }
     }
 
     async #removeRepeatedFilesOpened(handlers: Array<FileSystemFileHandle>, fileTable: fileTable) {
@@ -136,6 +143,10 @@ class FileSystem {
         return this.#rootHandler;
     }
 
+    findIdFromSearchTable(id: string) {
+        return this.#searchTable[id]
+    }
+
     idToFileHandler(id: string) {
         if (this.#fileTable[id]) return this.#fileTable[id];
         if (this.#searchTable[id]) {
@@ -165,9 +176,33 @@ class FileSystem {
         this.#fileSystemTree.push(rootNode);
     }
 
+    async addFileInfo(fileHandler: FileSystemFileHandle) {
+        let path = await this.#rootHandler?.resolve(fileHandler);
+        if (!path) {
+            return null;
+        } else {
+            const treeNode = this.#findNodeFromPath(path, this.#fileSystemTree, true);
+            if ("children" in treeNode) {
+                const newId = uuidv4();
+                const newNode: fileSystemFileNode = {
+                    id: newId,
+                    handle: fileHandler,
+                    ancestor: treeNode
+                }
+                treeNode.children[newId] = newNode;
+                this.#searchTable[newId] = newNode;
+                return newId;
+            } else {
+                return treeNode.id;
+            }
+        }
+    }
+
     async getFileInfo(fileHandlers: Array<FileSystemFileHandle>, ids?: Array<string>) {
-        const fileInfoArray: Array<{ name: string, id: string, content: string, type: "standalone" | "folder" }> = [];
+        console.log(this.#fileTable, this.#searchTable)
+        const fileInfoArray: Array<{ name: string, id: string, content: string, type: "standalone" | "infolder" }> = [];
         fileHandlers = await this.#removeRepeatedFilesOpened(fileHandlers, this.#fileTable)
+        console.log(fileHandlers, 1)
         if (!ids || ids.length !== fileHandlers.length) {
             for (let fileHandler of fileHandlers) {
                 let file = await fileHandler.getFile();
@@ -180,7 +215,7 @@ class FileSystem {
                     fileInfoArray.push({
                         name: fileHandler.name,
                         content: content,
-                        type: "folder",
+                        type: "infolder",
                         id: uuid
                     })
                 } else {
@@ -203,7 +238,7 @@ class FileSystem {
                 fileInfoArray.push({
                     name: fileHandlers[i].name,
                     content: content,
-                    type: "folder",
+                    type: "infolder",
                     id: uuid
                 })
                 this.#fileTable[uuid] = fileHandlers[i];
@@ -212,34 +247,37 @@ class FileSystem {
         return fileInfoArray;
     }
 
-    removeFileFromFileTable(id:string){
+    removeFileFromFileTable(id: string) {
         delete this.#fileTable[id];
     }
 
-    async getSaveHandlersInfo(fileHandlers: Array<FileSystemFileHandle>) {
-        const fileInfoArray: Array<{ name: string, id: string, type: "standalone" | "folder" | "new" }> = [];
-        for (let fileHandler of fileHandlers) {
-            let path = await this.#rootHandler.resolve(fileHandler)
-            if (path) {
-                let fileNode = this.#findNodeFromPath(path, this.#fileSystemTree);
-            } else{
-                let fileArray = Object.entries(this.#fileTable);
-                let opened = false;
-                
-                for (let entry of fileArray){
-                    if (await entry[1].isSameEntry(fileHandler)){
-                        opened = true
-                        break;
-                    }
-                }
-                if (opened){
-
-                }else{
-
+    //may need some garbage entry cleaning mechanics
+    updateFileTable(oldId: Array<string>, newId: Array<string>, newfileHandles: Array<FileSystemFileHandle>) {
+        if (newId.length === 0 || newfileHandles.length !== newId.length) return false;
+        if (oldId.length > 0) {
+            for (let i = 0; i < oldId.length; i++) {
+                if (oldId[i] in this.#fileTable) {
+                    delete this.#fileTable[oldId[i]];
                 }
             }
-
         }
+        for (let i = 0; i < newId.length; i++) {
+            if (!(newId[i] in this.#fileTable)) {
+                this.#fileTable[newId[i]] = newfileHandles[i];
+            }
+        }
+
+        return true
+    }
+
+
+    async writeToFile(fileHandle: FileSystemFileHandle, contents: string) {
+        // Create a FileSystemWritableFileStream to write to.
+        const writable = await fileHandle.createWritable();
+        // Write the contents of the file to the stream.
+        await writable.write(contents);
+        // Close the file and write the contents to disk.
+        await writable.close();
     }
 
     //Static
@@ -266,7 +304,8 @@ class FileSystem {
                             },
                         },
                     ],
-                }; */
+                }; 
+        */
         const handle = await window.showSaveFilePicker();
         return handle;
     };

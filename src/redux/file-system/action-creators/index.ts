@@ -4,14 +4,17 @@ import {
     GetDirectoryHandler,
     ImportFolderAction,
     Open,
-    SetCurrentId,
+    SetCurrentIndex,
     NewEditor,
     CloseEditor,
     fileArrayType,
     OpenTreeItem,
     NewFile,
+    Save,
     SaveAs,
-    ActionType
+    ActionType,
+    SaveAsStateUpdate,
+    ChangeEditorContent,
 } from '../actions';
 
 interface importFolderInputType {
@@ -52,14 +55,25 @@ export const newEditor = (fileArray: fileArrayType): NewEditor => {
     }
 }
 
-export const closeEditor = (id: string): CloseEditor => {
+export const changeEditorContent = (content: string): ChangeEditorContent => {
     return {
-        type: ActionType.CLOSE_EDITOR,
+        type: ActionType.CHANGE_EDITOR_CONTENT,
         payload: {
-            id
+            content
         }
     }
 }
+
+export const closeEditor = (index: number): CloseEditor => {
+    return {
+        type: ActionType.CLOSE_EDITOR,
+        payload: {
+            index
+        }
+    }
+}
+
+
 
 export const openTreeItem = (fileHandler: Array<FileSystemFileHandle>, id: Array<string>): OpenTreeItem => {
     return {
@@ -81,20 +95,41 @@ export const newFile = (id: string): NewFile => {
     }
 }
 
-export const setCurrentId = (id: string): SetCurrentId => {
+export const setCurrentIndex = (index: number): SetCurrentIndex => {
     return {
-        type: ActionType.SET_CURRENT_ID,
+        type: ActionType.SET_CURRENT_INDEX,
         payload: {
-            id
+            index
         }
     }
 }
 
-export const saveAs = (handler: FileSystemFileHandle): SaveAs => {
+export const saveAs = (destinationHandler: FileSystemFileHandle): SaveAs => {
     return {
         type: ActionType.SAVE_AS,
         payload: {
-            handler
+            destinationHandler
+        }
+    }
+}
+
+export const save = (): Save => {
+    return {
+        type: ActionType.SAVE,
+        payload: {
+        }
+    }
+}
+
+
+export const saveAsStateUpdate = ( desId: string, desName: string, desType: string, ancestorId: string): SaveAsStateUpdate => {
+    return {
+        type: ActionType.SAVE_AS_STATE_UPDATE,
+        payload: {
+            ancestorId,
+            desId,
+            desName,
+            desType
         }
     }
 }
