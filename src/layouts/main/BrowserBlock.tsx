@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Preview from 'components/Preview';
+import Preview from 'components/preview';
 
 const Container = styled.div`
   display: flex;
