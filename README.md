@@ -1,6 +1,6 @@
 # Getting Started with demo
 
-This project demo: https://ada2468.github.io/Web_IDE_Build/
+This project demo: https://ada2468.github.io/Web_IDE/
 
 ## Available Scripts
 
