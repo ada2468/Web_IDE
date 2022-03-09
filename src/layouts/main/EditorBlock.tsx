@@ -71,7 +71,7 @@ const EditorBlock = (props: PropsFromRedux) => {
     props.dispatch(closeEditor(index))
   }
 
-  const handleEditorContentChange : OnChange = (value, e) =>{
+  const handleEditorContentChange: OnChange = (value, e) => {
     props.dispatch(changeEditorContent(value));
   }
 
@@ -100,11 +100,12 @@ const EditorBlock = (props: PropsFromRedux) => {
         </StyledTabs>
       </Header>
       <Wrapper>
-
-        <Editor id={currentId}
-          content={editorState[editorState.findIndex(state => state.id === currentId)]?.content}
-          onChange={handleEditorContentChange}
-        />
+        { editorState.length > 0 &&
+          <Editor id={currentId}
+            content={editorState[editorState.findIndex(state => state.id === currentId)]?.content}
+            onChange={handleEditorContentChange}
+          />
+        }
       </Wrapper>
     </Container>
   );
